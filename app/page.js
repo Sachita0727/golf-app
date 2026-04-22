@@ -1,3 +1,5 @@
+"use client"
+
 export default function Home() {
   return (
     <div style={{
@@ -23,7 +25,8 @@ export default function Home() {
           background: "#3b82f6",
           color: "#fff",
           border: "none",
-          borderRadius: "8px"
+          borderRadius: "8px",
+          cursor: "pointer"
         }}
       >
         Get Started
