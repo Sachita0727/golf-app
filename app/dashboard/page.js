@@ -65,6 +65,7 @@ export default function Dashboard() {
 
   const runDraw = async () => {
     let numbers = []
+
     while (numbers.length < 5) {
       let num = Math.floor(Math.random() * 45) + 1
       if (!numbers.includes(num)) numbers.push(num)
@@ -115,50 +116,126 @@ export default function Dashboard() {
     window.location.href = "/"
   }
 
+  // 🎨 STYLES
   const card = {
     background: "linear-gradient(135deg, #1e293b, #0f172a)",
     padding: "20px",
     borderRadius: "12px",
-    marginBottom: "20px"
+    marginBottom: "20px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.4)"
+  }
+
+  const btn = {
+    padding: "10px 15px",
+    borderRadius: "8px",
+    border: "none",
+    background: "#3b82f6",
+    color: "#fff",
+    cursor: "pointer",
+    transition: "all 0.3s ease"
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0f172a", color: "#fff", padding: "30px" }}>
+    <div style={{
+      minHeight: "100vh",
+      background: "#0f172a",
+      color: "#fff",
+      padding: "30px"
+    }}>
+
       <div style={{ maxWidth: "900px", margin: "auto" }}>
 
-        <h1 style={{ textAlign: "center" }}>🌍 Play. Win. Give Back</h1>
+        <h1 style={{ textAlign: "center" }}>
+          🌍 Play. Win. Give Back
+        </h1>
 
+        {/* PROFILE */}
         <div style={card}>
           <h3>👤 Profile</h3>
           <p>Plan: {profile?.plan}</p>
           <p>Charity: {profile?.charity}</p>
         </div>
 
+        {/* SCORE */}
         <div style={card}>
           <h3>⛳ Add Score</h3>
-          <input value={score} onChange={(e)=>setScore(e.target.value)} />
-          <button onClick={addScore}>Add</button>
+
+          <input
+            value={score}
+            onChange={(e)=>setScore(e.target.value)}
+            style={{ padding: "8px", borderRadius: "6px", marginRight: "10px" }}
+          />
+
+          <button
+            style={btn}
+            onClick={addScore}
+            onMouseOver={(e)=>e.target.style.opacity=0.8}
+            onMouseOut={(e)=>e.target.style.opacity=1}
+          >
+            Add
+          </button>
 
           {scores.map(s => (
             <p key={s.id}>{s.score}</p>
           ))}
         </div>
 
+        {/* DRAW */}
         <div style={card}>
-          <button onClick={runDraw}>Run Draw</button>
-          <button onClick={checkResult}>Check</button>
-          <p>{result}</p>
+          <button
+            style={btn}
+            onClick={runDraw}
+            onMouseOver={(e)=>e.target.style.opacity=0.8}
+            onMouseOut={(e)=>e.target.style.opacity=1}
+          >
+            Run Draw
+          </button>
+
+          <button
+            style={{ ...btn, marginLeft: "10px" }}
+            onClick={checkResult}
+            onMouseOver={(e)=>e.target.style.opacity=0.8}
+            onMouseOut={(e)=>e.target.style.opacity=1}
+          >
+            Check
+          </button>
+
+          {result && (
+            <div style={{
+              marginTop: "15px",
+              background: result.includes("😢") ? "#ef4444" : "#22c55e",
+              padding: "10px",
+              borderRadius: "6px",
+              transition: "all 0.3s ease"
+            }}>
+              {result}
+            </div>
+          )}
         </div>
 
+        {/* IMPACT */}
         <div style={card}>
           <h3>❤️ Impact</h3>
           <p>{profile?.charity}</p>
         </div>
 
-        <button onClick={()=>window.location.href="/admin"}>Admin</button>
-        <button onClick={logout}>Logout</button>
+        {/* ADMIN */}
+        <button
+          onClick={()=>window.location.href="/admin"}
+          style={{ ...btn, background: "#10b981", width: "100%" }}
+        >
+          Admin
+        </button>
+
+        {/* LOGOUT */}
+        <button
+          onClick={logout}
+          style={{ ...btn, background: "#ef4444", width: "100%", marginTop: "10px" }}
+        >
+          Logout
+        </button>
 
       </div>
     </div>
   )
-}
+              }
