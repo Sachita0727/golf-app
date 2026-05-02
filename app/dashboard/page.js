@@ -7,6 +7,7 @@ export default function Dashboard() {
   const [scores, setScores] = useState([])
   const [profile, setProfile] = useState(null)
   const [result, setResult] = useState("")
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -40,6 +41,8 @@ export default function Dashboard() {
       return
     }
 
+    setLoading(true)
+
     const { data: userData } = await supabase.auth.getUser()
     const user = userData.user
 
@@ -49,6 +52,14 @@ export default function Dashboard() {
       .eq("user_id", user.id)
       .order("date", { ascending: true })
 
+    // ❌ duplicate रोकना
+    if (data.some(s => s.score == score)) {
+      alert("Score already added")
+      setLoading(false)
+      return
+    }
+
+    // max 5 scores
     if (data.length >= 5) {
       await supabase.from("scores").delete().eq("id", data[0].id)
     }
@@ -60,6 +71,7 @@ export default function Dashboard() {
     })
 
     setScore("")
+    setLoading(false)
     loadData()
   }
 
@@ -116,7 +128,7 @@ export default function Dashboard() {
     window.location.href = "/"
   }
 
-  // 🎨 STYLES
+  // 🎨 styles
   const card = {
     background: "linear-gradient(135deg, #1e293b, #0f172a)",
     padding: "20px",
@@ -136,18 +148,16 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "#0f172a",
-      color: "#fff",
-      padding: "30px"
-    }}>
-
+    <div style={{ minHeight: "100vh", background: "#0f172a", color: "#fff", padding: "30px" }}>
       <div style={{ maxWidth: "900px", margin: "auto" }}>
 
-        <h1 style={{ textAlign: "center" }}>
+        <h1 style={{ textAlign: "center", fontSize: "32px" }}>
           🌍 Play. Win. Give Back
         </h1>
+
+        <p style={{ textAlign: "center", opacity: 0.7, marginBottom: "25px" }}>
+          Track scores • Win rewards • Support charities ❤️
+        </p>
 
         {/* PROFILE */}
         <div style={card}>
@@ -169,35 +179,37 @@ export default function Dashboard() {
           <button
             style={btn}
             onClick={addScore}
-            onMouseOver={(e)=>e.target.style.opacity=0.8}
-            onMouseOut={(e)=>e.target.style.opacity=1}
+            onMouseOver={(e)=>e.target.style.transform="scale(1.05)"}
+            onMouseOut={(e)=>e.target.style.transform="scale(1)"}
           >
-            Add
+            {loading ? "Adding..." : "Add"}
           </button>
 
+          {scores.length === 0 && <p style={{ opacity: 0.6 }}>No scores yet</p>}
+
           {scores.map(s => (
-            <p key={s.id}>{s.score}</p>
+            <div key={s.id} style={{
+              display: "flex",
+              justifyContent: "space-between",
+              background: "#334155",
+              padding: "8px",
+              borderRadius: "6px",
+              marginTop: "5px"
+            }}>
+              {s.score}
+              <span style={{ fontSize: "12px", color: "#ccc" }}>
+                {new Date(s.date).toLocaleDateString()}
+              </span>
+            </div>
           ))}
         </div>
 
         {/* DRAW */}
         <div style={card}>
-          <button
-            style={btn}
-            onClick={runDraw}
-            onMouseOver={(e)=>e.target.style.opacity=0.8}
-            onMouseOut={(e)=>e.target.style.opacity=1}
-          >
-            Run Draw
-          </button>
+          <button style={btn} onClick={runDraw}>Run Draw</button>
 
-          <button
-            style={{ ...btn, marginLeft: "10px" }}
-            onClick={checkResult}
-            onMouseOver={(e)=>e.target.style.opacity=0.8}
-            onMouseOut={(e)=>e.target.style.opacity=1}
-          >
-            Check
+          <button style={{ ...btn, marginLeft: "10px" }} onClick={checkResult}>
+            Check Result
           </button>
 
           {result && (
@@ -238,4 +250,4 @@ export default function Dashboard() {
       </div>
     </div>
   )
-              }
+}
