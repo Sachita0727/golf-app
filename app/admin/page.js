@@ -5,88 +5,80 @@ import { supabase } from "../../lib/supabase"
 
 export default function Admin() {
   const [users, setUsers] = useState([])
+  const [scores, setScores] = useState([])
+  const [draws, setDraws] = useState([])
 
   useEffect(() => {
-    loadUsers()
+    loadData()
   }, [])
 
-  const loadUsers = async () => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
+  const loadData = async () => {
+    const { data: usersData } = await supabase.from("profiles").select("*")
+    const { data: scoresData } = await supabase.from("scores").select("*")
+    const { data: drawsData } = await supabase.from("draws").select("*")
 
-    setUsers(data || [])
+    setUsers(usersData || [])
+    setScores(scoresData || [])
+    setDraws(drawsData || [])
   }
 
-  // 📊 Subscription Stats
-  const totalUsers = users.length
-  const monthly = users.filter(u => u.plan === "Monthly").length
-  const yearly = users.filter(u => u.plan === "Yearly").length
-
-  // ❤️ Charity Stats
-  const education = users.filter(u => u.charity === "Education Fund").length
-  const health = users.filter(u => u.charity === "Health Support").length
-  const env = users.filter(u => u.charity === "Environment").length
-
-  // 🎨 Styles
   const card = {
     background: "#1e293b",
     padding: "15px",
     borderRadius: "10px",
-    marginTop: "15px",
-    color: "#fff"
+    marginBottom: "15px"
   }
 
   return (
     <div style={{
-      padding: "30px",
-      background: "#0f172a",
       minHeight: "100vh",
-      color: "#fff"
+      background: "#0f172a",
+      color: "#fff",
+      padding: "30px"
     }}>
+      <div style={{ maxWidth: "900px", margin: "auto" }}>
 
-      <h1 style={{ textAlign: "center" }}>
-        👑 Admin Panel
-      </h1>
+        <h1 style={{ textAlign: "center" }}>🛠️ Admin Dashboard</h1>
 
-      {/* 📊 Subscription */}
-      <div style={card}>
-        <h3>📊 Subscription Stats</h3>
-        <p>Total Users: {totalUsers}</p>
-        <p>Monthly: {monthly}</p>
-        <p>Yearly: {yearly}</p>
+        {/* STATS */}
+        <div style={card}>
+          <h3>📊 Stats</h3>
+          <p>Total Users: {users.length}</p>
+          <p>Total Scores: {scores.length}</p>
+          <p>Total Draws: {draws.length}</p>
+        </div>
+
+        {/* USERS */}
+        <div style={card}>
+          <h3>👥 Users</h3>
+          {users.map(u => (
+            <p key={u.id}>
+              {u.email} | {u.plan} | {u.charity}
+            </p>
+          ))}
+        </div>
+
+        {/* SCORES */}
+        <div style={card}>
+          <h3>⛳ Scores</h3>
+          {scores.map(s => (
+            <p key={s.id}>
+              {s.user_id} → {s.score}
+            </p>
+          ))}
+        </div>
+
+        {/* DRAWS */}
+        <div style={card}>
+          <h3>🎲 Draws</h3>
+          {draws.map(d => (
+            <p key={d.id}>
+              {d.numbers?.join(", ")}
+            </p>
+          ))}
+        </div>
+
       </div>
-
-      {/* ❤️ Charity */}
-      <div style={card}>
-        <h3>❤️ Charity Stats</h3>
-        <p>Education Fund: {education}</p>
-        <p>Health Support: {health}</p>
-        <p>Environment: {env}</p>
-      </div>
-
-      {/* 👥 Users */}
-      <div style={card}>
-        <h3>👥 All Users</h3>
-
-        {users.length === 0 ? (
-          <p>No users found</p>
-        ) : (
-          users.map(user => (
-            <div key={user.id} style={{
-              background: "#334155",
-              padding: "10px",
-              borderRadius: "8px",
-              marginTop: "10px"
-            }}>
-              <p><b>Email:</b> {user.email}</p>
-              <p><b>Plan:</b> {user.plan}</p>
-              <p><b>Charity:</b> {user.charity}</p>
-            </div>
-          ))
-        )}
-      </div>
-
     </div>
   )
 }
