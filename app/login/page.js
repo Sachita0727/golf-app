@@ -9,39 +9,55 @@ export default function Login() {
   const [plan, setPlan] = useState("Monthly")
   const [charity, setCharity] = useState("Education Fund")
   const [isSignup, setIsSignup] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  // SIGNUP
   const signup = async () => {
+    setLoading(true)
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
     })
 
-    if (error) return alert(error.message)
+    if (error) {
+      alert(error.message)
+      setLoading(false)
+      return
+    }
 
     const user = data.user
-    if (!user) return alert("Signup failed")
+    if (!user) {
+      alert("Signup failed")
+      setLoading(false)
+      return
+    }
 
     await supabase.from("profiles").insert({
       id: user.id,
-      email:email,
-      plan:plan,
-      charity:charity,
+      email,
+      plan,
+      charity
     })
 
     alert("Signup successful! Now login")
     setIsSignup(false)
+    setLoading(false)
   }
 
-  // LOGIN
   const login = async () => {
+    setLoading(true)
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password
     })
 
-    if (error) alert(error.message)
-    else window.location.href = "/dashboard"
+    if (error) {
+      alert(error.message)
+      setLoading(false)
+    } else {
+      window.location.href = "/dashboard"
+    }
   }
 
   return (
@@ -58,7 +74,8 @@ export default function Login() {
         width: "350px",
         padding: "20px",
         background: "#1e293b",
-        borderRadius: "12px"
+        borderRadius: "12px",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.4)"
       }}>
 
         <h2 style={{ textAlign: "center" }}>
@@ -78,7 +95,6 @@ export default function Login() {
           style={input}
         />
 
-        {/* SIGNUP EXTRA */}
         {isSignup && (
           <>
             <select onChange={(e)=>setPlan(e.target.value)} style={input}>
@@ -97,8 +113,10 @@ export default function Login() {
         <button
           onClick={isSignup ? signup : login}
           style={btn}
+          onMouseOver={(e)=>e.target.style.transform="scale(1.05)"}
+          onMouseOut={(e)=>e.target.style.transform="scale(1)"}
         >
-          {isSignup ? "Signup" : "Login"}
+          {loading ? "Please wait..." : isSignup ? "Signup" : "Login"}
         </button>
 
         <p style={{ textAlign: "center", marginTop: "10px" }}>
@@ -107,10 +125,7 @@ export default function Login() {
 
         <button
           onClick={() => setIsSignup(!isSignup)}
-          style={{
-            ...btn,
-            background: "#10b981"
-          }}
+          style={{ ...btn, background: "#10b981" }}
         >
           {isSignup ? "Go to Login" : "Create Account"}
         </button>
@@ -120,7 +135,6 @@ export default function Login() {
   )
 }
 
-// styles
 const input = {
   width: "100%",
   padding: "10px",
@@ -137,5 +151,6 @@ const btn = {
   border: "none",
   background: "#3b82f6",
   color: "#fff",
-  cursor: "pointer"
+  cursor: "pointer",
+  transition: "all 0.3s ease"
 }
